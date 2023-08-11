@@ -8,15 +8,23 @@ data:
   policy.yaml: |
     apiVersion: "descheduler/v1alpha2"
     kind: "DeschedulerPolicy"
+    nodeSelector: cloud.google.com/gke-nodepool=green # will evict pods only on this node
+    maxNoOfPodsToEvictPerNamespace: 10 # will evict only 10 pods per one job run
     profiles:
       - name: ProfileName
         pluginConfig:
+        - name: "DefaultEvictor"
+          args:
+            evictSystemCriticalPods: false
+            evictFailedBarePods: true
+            evictLocalStoragePods: true
+            nodeFit: true
         - name: "PodLifeTime"
           args:
             maxPodLifeTimeSeconds: 86400 # 24 hours
             namespaces:
               include:
-              - "infra"
+              - "default"
             labelSelector:
               matchLabels:
                 team: cloudops
